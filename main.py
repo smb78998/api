@@ -25,58 +25,68 @@ headers = {
 		"x-rapidapi-host": "covid-19-statistics.p.rapidapi.com"
 	}
 
-with open('namesV7.csv', mode='w') as csvfile:
+with open('01_to_06_2022_V2.csv', mode='w') as csvfile:
 	fieldnames = ['date', 'last_update', 'confirmed', 'confirmed_diff', 'deaths', 'deaths_diff', 'recovered',
-				  'recovered_diff', 'active', 'active_diff', 'fatality_rate']
+				  'recovered_diff', 'active', 'active_diff', 'fatality_rate', 'state',]
 	writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 	writer.writeheader()
 
 # for x in states:
 	# Define the day as a variable
-	i = 1
-	j = 1
-	month_variable = "01"
-	day_variable = "01" # Change this to whatever day you want
-	while i < 12:
-		while j < 32:
-			# Combine the fixed "2022-04" with the variable day
-			date_variable = str(f"2022-{month_variable}-{day_variable}")
-			print(date_variable)
 
-			# Use the date_variable in the querystring
-			querystring = {
-				"iso": "USA",
-				"region_province": "Alabama",
-				"region_name": "US",
-				"date": date_variable  # Using the variable here
-			}
+	# Change this to whatever day you want
+	for x in states:
+		print(x)
 
-			#Requesting data
-			response = requests.get(url, headers=headers, params=querystring)
-			myDict = response.json().get("data")
-			# ctrl / to comment out
+	for x in states:
+		i = 1
+		month_variable = "01"
+		while i <= 6:
+			j = 1
+			day_variable= "01"
+			while j < 32:
+				# Combine the fixed "2022-04" with the variable day
+				date_variable = str(f"2022-{month_variable}-{day_variable}")
+				print(date_variable)
 
-			print(response.json())
+				# Use the date_variable in the querystring
+				querystring = {
+					"iso": "USA",
+					"region_province": x,
+					"region_name": "US",
+					"date": date_variable  # Using the variable here
+				}
 
-			# prints out to cvs
-			if myDict:
-				# If data is present, write to the CSV
-				writer.writerow(myDict)
+				#Requesting data
+				response = requests.get(url, headers=headers, params=querystring)
+				myDict = response.json().get("data")
+				print(type(myDict))
+				# ctrl / to comment out
+
+
+
+				# prints out to cvs
+				if myDict:
+					# If data is present, write to the CSV
+					writer.writerow(myDict)
+					myDict['state'] = x
+					print(response.json())
+					print(myDict)
+				else:
+					print(f"No data found for date {date_variable}")
+
+				# increase day count, but keep formating okay for string
+				j = j + 1
+				if j < 10:
+					day_variable = "0" + str(j)  # Convert the number to a string and concatenate
+				else:
+					day_variable = str(j)  # If number >= 10, just convert it to a string
+
+			i = i + 1
+			if i < 10:
+				month_variable = "0" + str(i)  # Convert the number to a string and concatenate
 			else:
-				print(f"No data found for date {date_variable}")
-
-			# increase day count, but keep formating okay for string
-			j = j + 1
-			if j < 10:
-				day_variable = "0" + str(j)  # Convert the number to a string and concatenate
-			else:
-				day_variable = str(j)  # If number >= 10, just convert it to a string
-
-		i = i + 1
-		if i < 10:
-			month_variable = "0" + str(i)  # Convert the number to a string and concatenate
-		else:
-			month_variable = str(i)  # If number >= 10, just convert it to a string
+				month_variable = str(i)  # If number >= 10, just convert it to a string
 
 # PRINTING OUT RESPONSES******************
 	#print(response.json())
